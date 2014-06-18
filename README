@@ -1,0 +1,45 @@
+Initial work on complex feature support:
+
+1. Uses geotools 'app-schema' to wrap existing simple feature data stores and return complex features
+2. Provides ability to join on two different data stores
+
+Current example joins the 'gdelt' GeoMesa data store with a simple property file data store using
+the Actor1Name field.
+
+About app-schema:
+    App-schema is a standard geotools/geoserver feature that allows you to map any simple feature
+    data store into GML format, defined by an XSD file. These XSDs are known as 'application schemas',
+    and there are many standardized ones already defined (http://en.wikipedia.org/wiki/GML_Application_Schemas).
+    In addition, user's may define their own GML output format.
+
+    The data store output is defined by a mapping file, which maps the data store feature properties
+    to elements in the output. This allows for the creation of complex features from simple features.
+
+Mapping files for geotools app-schema are explained here:
+    http://docs.geoserver.org/latest/en/user/data/app-schema/mapping-file.html
+Feature chaining is the joining of data from multiple data stores:
+    http://docs.geoserver.org/latest/en/user/data/app-schema/feature-chaining.html
+Useful diagram on joins:
+    http://docs.geoserver.org/latest/en/user/_downloads/one_to_many_relationship.JPG
+
+This example is based on the geoserver tutorial on setting up app-schema, which is found here:
+    http://docs.geoserver.org/latest/en/user/data/app-schema/tutorial.html
+    http://sourceforge.net/projects/geoserver/files/GeoServer/2.5.1/extensions/geoserver-2.5.1-app-schema-plugin.zip/download
+
+gdelt-gsml-GeologicUnit-mapping.xml - maps the GDELT data store to the GSML GeologicalUnit element.
+    imports the next mapping:
+ucd-gsml-MappedFeature-mapping.xml - maps a properties data store to the MappedFeature element.
+
+The two files join on:
+    gdelt:'Actor1Name' == props:GU_ID
+
+Joins in the mapping files are defined by link elements:
+    <sourceExpression>
+        <OCQL>Actor1Name</OCQL>
+        <linkElement>gsml:MappedFeature</linkElement>
+        <linkField>gml:name[2]</linkField>
+    </sourceExpression>
+
+Geotools will evaluate the CQL and then try to look up a matching element, which can come from a
+different mapping file. From my understanding, each join will be a separate query against the data
+store based on that attribute value.
