@@ -18,7 +18,6 @@ import org.geotools.factory.CommonFactoryFinder;
 import org.geotools.feature.FeatureCollection;
 import org.geotools.feature.FeatureIterator;
 import org.geotools.feature.NameImpl;
-import org.geotools.filter.text.cql2.CQL;
 import org.geotools.filter.text.cql2.CQLException;
 import org.geotools.gml3.GML;
 import org.geotools.gml3.GMLConfiguration;
@@ -66,7 +65,7 @@ public class ComplexFeaturesTutorial {
 
     public static final String GSML_NAMESPACE = "urn:cgi:xmlns:CGI:GeoSciML:2.0";
 
-    public static final QName type = new QName(GSML_NAMESPACE, "GeologicUnit");
+    public static final QName type = new QName(GSML_NAMESPACE, "MappedFeature");
 
     public static final Name nameProperty = new NameImpl(GML.name);
 
@@ -217,7 +216,7 @@ public class ComplexFeaturesTutorial {
 //        CommandLine cmd = parser.parse(options, args);
 
         URL mappingFile = ComplexFeaturesTutorial.class.getClassLoader().getResource(
-                "gdelt-gsml-GeologicUnit-mapping.xml");
+                "gdelt-gsm-mapping.xml");
 
         System.out.println("Using mapping file: " + mappingFile);
 
@@ -229,24 +228,20 @@ public class ComplexFeaturesTutorial {
         DataAccess<FeatureType, Feature> dataAccess = null;
         try {
             dataAccess = DataAccessFinder.getDataStore(configuration);
-            System.out.println("got data store");
             FeatureSource<FeatureType, Feature> source = dataAccess.getFeatureSource(new NameImpl(
                     type));
-            System.out.println("got feature source");
+System.out.println("got feature source");
             Filter cqlFilter = createBaseFilter();
 
             // use the 2-arg constructor for the query - this will not restrict the attributes returned
-            Query query = new Query(type.getLocalPart(), CQL.toFilter("INCLUDE"));
+            Query query = new Query(type.getLocalPart(), cqlFilter);
             query.setNamespace(URI.create(type.getNamespaceURI()));
             query.setMaxFeatures(10);
 
             FeatureCollection<FeatureType, Feature> features = source.getFeatures(query);
-            System.out.println("got features");
             FeatureIterator<Feature> iterator = features.features();
-            System.out.println("got iterator");
             try {
                 while (iterator.hasNext()) {
-                    System.out.println();
                     Feature f = iterator.next();
                     System.out.println("Feature "
                                        + f.getIdentifier().toString()
